@@ -2,13 +2,15 @@ package com.example.vagas.repository;
 
 import com.example.vagas.model.Empresa;
 import com.example.vagas.model.Vaga;
-import org.springframework.data.jpa.repository.JpaRepository;
+// Importe CrudRepository em vez de PagingAndSortingRepository
+import org.springframework.data.repository.CrudRepository; // <-- ALTERADO AQUI
 import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDate;
 import java.util.List;
 
-public interface VagaRepository extends JpaRepository<Vaga, Long> {
+// Altere a interface para estender CrudRepository
+public interface VagaRepository extends CrudRepository<Vaga, Long> {
     List<Vaga> findByDataLimiteInscricaoAfter(LocalDate hoje);
     List<Vaga> findByCidadeAndDataLimiteInscricaoAfter(String cidade, LocalDate hoje);
     List<Vaga> findByEmpresaOrderByDataLimiteInscricaoDesc(Empresa empresa);

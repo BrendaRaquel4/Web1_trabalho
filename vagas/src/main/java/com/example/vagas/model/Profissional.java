@@ -1,92 +1,66 @@
 package com.example.vagas.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.PrimaryKeyJoinColumn;
+import jakarta.persistence.Table;
 import java.time.LocalDate;
 
-@Entity
-public class Profissional {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@Entity
+@Table(name = "profissional") // Mapeia para a tabela 'profissional'
+@PrimaryKeyJoinColumn(name = "id") // Chave primária de Profissional também é FK para Usuario
+public class Profissional extends Usuario { // Profissional agora estende apenas Usuario
 
     @Column(unique = true, nullable = false)
-    private String email;
-
-    @Column(nullable = false)
-    private String senha;
-
-    @Column(nullable = false)
     private String cpf;
 
-    private String nome;
     private String telefone;
     private String sexo;
     private LocalDate dataNascimento;
 
-    // Getters e Setters
-    public Long getId() {
-        return id;
+    public Profissional() {
+        super(); // Chama construtor padrão da superclasse
+        this.setRole("ROLE_PROFISSIONAL"); // Define a role específica para Profissionais
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getSenha() {
-        return senha;
-    }
-
-    public void setSenha(String senha) {
-        this.senha = senha;
-    }
-
-    public String getCpf() {
-        return cpf;
-    }
-
-    public void setCpf(String cpf) {
+    public Profissional(String email, String senha, String nome, String cpf, String telefone, String sexo, LocalDate dataNascimento) {
+        // Chama construtor parametrizado da superclasse, passando a role
+        super(email, senha, nome, "ROLE_PROFISSIONAL");
         this.cpf = cpf;
-    }
-
-    public String getNome() {
-        return nome;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
-    public String getTelefone() {
-        return telefone;
-    }
-
-    public void setTelefone(String telefone) {
         this.telefone = telefone;
-    }
-
-    public String getSexo() {
-        return sexo;
-    }
-
-    public void setSexo(String sexo) {
         this.sexo = sexo;
-    }
-
-    public LocalDate getDataNascimento() {
-        return dataNascimento;
-    }
-
-    public void setDataNascimento(LocalDate dataNascimento) {
         this.dataNascimento = dataNascimento;
     }
-}
 
+    // Getters e Setters específicos de Profissional
+    public String getCpf() { 
+        return cpf; 
+    }
+    public void setCpf(String cpf) { 
+        this.cpf = cpf; 
+    }
+    public String getTelefone() { 
+        return telefone; 
+    }
+    public void setTelefone(String telefone) { 
+        this.telefone = telefone; 
+    }
+    public String getSexo() { 
+        return sexo; 
+    }
+    public void setSexo(String sexo) { 
+        this.sexo = sexo; 
+    }
+    public LocalDate getDataNascimento() { 
+        return dataNascimento; 
+    }
+    public void setDataNascimento(LocalDate dataNascimento) { 
+        this.dataNascimento = dataNascimento; 
+    }
+
+    // Os métodos de UserDetails (getAuthorities, getPassword, getUsername, etc.)
+    // são agora herdados diretamente de Usuario. Não precisam ser sobrescritos aqui,
+    // a menos que haja um comportamento muito específico para Profissional.
+    // O getAuthorities em Usuario já retornará "ROLE_PROFISSIONAL" porque o construtor o define.
+}

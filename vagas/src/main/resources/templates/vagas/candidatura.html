@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candidaturas para Vaga</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">Vagas</a> </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="card">
+            <div class="card-header">
+                <h2>Candidaturas para a Vaga: <span th:text="${vaga.descricao}">[Descrição da Vaga]</span></h2>
+                <p class="mb-0">Cidade: <span th:text="${vaga.cidade}">[Cidade]</span></p>
+                <p class="mb-0">Remuneração: <span th:text="${vaga.remuneracao}">[Remuneração]</span></p>
+                <p class="mb-0">Data Limite de Inscrição: <span th:text="${#temporals.format(vaga.dataLimiteInscricao, 'dd/MM/yyyy')}">[Data]</span></p>
+                <a th:href="@{/vagas/index}" class="btn btn-secondary btn-sm mt-2">Voltar para Minhas Vagas</a>
+            </div>
+            <div class="card-body">
+                <div th:if="${successMessage}" class="alert alert-success mt-3" th:text="${successMessage}"></div>
+                <div th:if="${errorMessage}" class="alert alert-danger mt-3" th:text="${errorMessage}"></div>
+
+                <h3 class="mt-4">Lista de Candidatos</h3>
+                <div th:if="${#lists.isEmpty(candidaturas)}" class="alert alert-info">
+                    Nenhum candidato se inscreveu para esta vaga ainda.
+                </div>
+                <table th:if="${!#lists.isEmpty(candidaturas)}" class="table table-striped mt-3">
+                    <thead>
+                        <tr>
+                            <th>Profissional</th>
+                            <th>Email</th>
+                            <th>Mensagem</th>
+                            <th>Status Atual</th>
+                            <th>Data Entrevista</th>
+                            <th>Link Entrevista</th>
+                            <th>Currículo</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="candidatura : ${candidaturas}">
+                            <td th:text="${candidatura.profissional.nome}">[Nome do Profissional]</td>
+                            <td th:text="${candidatura.profissional.email}">[Email do Profissional]</td>
+                            <td th:text="${candidatura.mensagem}">[Mensagem do Candidato]</td>
+                            <td>
+                                <span th:text="${candidatura.status}">[Status]</span>
+                            </td>
+                            <td>
+                                <span th:if="${candidatura.dataEntrevista}" th:text="${#temporals.format(candidatura.dataEntrevista, 'dd/MM/yyyy HH:mm')}"></span>
+                                <span th:unless="${candidatura.dataEntrevista}">N/A</span>
+                            </td>
+                            <td>
+                                <a th:if="${candidatura.linkEntrevista}" th:href="${candidatura.linkEntrevista}" target="_blank" th:text="${candidatura.linkEntrevista}">Link</a>
+                                <span th:unless="${candidatura.linkEntrevista}">N/A</span>
+                            </td>
+                            <td>
+                                <a th:if="${candidatura.curriculoNome}" th:href="@{/candidaturas/download-curriculo/{id}(id=${candidatura.id})}" target="_blank" th:text="${candidatura.curriculoNome}">Download Currículo</a>
+                                <span th:unless="${candidatura.curriculoNome}">N/A</span>
+                            </td>
+                            <td>
+                                <form th:action="@{/vagas/__${vaga.id}__/candidaturas/__${candidatura.id}__/atualizar-status}" method="post" class="status-form">
+                                    <div class="mb-2">
+                                        <label for="novoStatus" class="form-label visually-hidden">Status</label>
+                                        <select name="novoStatus" class="form-select status-select">
+                                            <option value="ABERTO" th:selected="${candidatura.status == T(com.example.vagas.model.StatusCandidatura).ABERTO}">ABERTO</option>
+                                            <option value="ENTREVISTA" th:selected="${candidatura.status == T(com.example.vagas.model.StatusCandidatura).ENTREVISTA}">ENTREVISTA</option>
+                                            <option value="NAO_SELECIONADO" th:selected="${candidatura.status == T(com.example.vagas.model.StatusCandidatura).NAO_SELECIONADO}">NÃO SELECIONADO</option>
+                                        </select>
+                                    </div>
+                                    <div class="interview-fields" style="display: none;">
+                                        <div class="mb-2">
+                                            <label for="dataEntrevista" class="form-label">Data Entrevista:</label>
+                                            <input type="date" name="dataEntrevista" class="form-control form-control-sm" th:value="${candidatura.dataEntrevista != null ? #temporals.format(candidatura.dataEntrevista, 'yyyy-MM-dd') : ''}" />
+                                        </div>
+                                         <div class="mb-2">
+                                            <label for="horaEntrevista" class="form-label">Hora Entrevista:</label>
+                                            <input type="time" name="horaEntrevista" class="form-control form-control-sm" th:value="${candidatura.dataEntrevista != null ? #temporals.format(candidatura.dataEntrevista, 'HH:mm') : ''}" />
+                                        </div>
+                                        <div class="mb-2">
+                                            <label for="linkEntrevista" class="form-label">Link Entrevista:</label>
+                                            <input type="text" name="linkEntrevista" class="form-control form-control-sm" placeholder="Link da videoconferência" th:value="${candidatura.linkEntrevista}" />
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-sm mt-2">Atualizar</button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const statusSelects = document.querySelectorAll('.status-select');
+
+            statusSelects.forEach(select => {
+                const form = select.closest('form');
+                const interviewFields = form.querySelector('.interview-fields');
+
+                // Função para controlar a visibilidade dos campos de entrevista
+                function toggleInterviewFields() {
+                    if (select.value === 'ENTREVISTA') {
+                        interviewFields.style.display = 'block';
+                    } else {
+                        interviewFields.style.display = 'none';
+                    }
+                }
+
+                // Chamar na carga inicial da página
+                toggleInterviewFields();
+
+                // Chamar na mudança do select
+                select.addEventListener('change', toggleInterviewFields);
+            });
+        });
+    </script>
+
+    </body>
+</html>

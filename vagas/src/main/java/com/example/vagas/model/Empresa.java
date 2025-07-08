@@ -1,123 +1,57 @@
 package com.example.vagas.model;
 
-import jakarta.persistence.*;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.PrimaryKeyJoinColumn;
+import jakarta.persistence.Table;
 
-import java.util.Collection;
-import java.util.List;
 
 @Entity
-public class Empresa implements UserDetails {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@Table(name = "empresa") // Mapeia para a tabela 'empresa'
+@PrimaryKeyJoinColumn(name = "id") // Chave primária de Empresa também é FK para Usuario
+public class Empresa extends Usuario { // Empresa agora estende apenas Usuario, que já implementa UserDetails
 
     @Column(unique = true, nullable = false)
-    private String email;
-
-    @Column(nullable = false)
-    private String senha;
-
-    @Column(nullable = false)
     private String cnpj;
 
-    private String nome;
     private String descricao;
     private String cidade;
 
-    
-    public Long getId() {
-        return id;
+    public Empresa() {
+        super(); // Chama construtor padrão da superclasse
+        this.setRole("ROLE_EMPRESA"); // Define a role específica para Empresas
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getSenha() {
-        return senha;
-    }
-
-    public void setSenha(String senha) {
-        this.senha = senha;
-    }
-
-    public String getCnpj() {
-        return cnpj;
-    }
-
-    public void setCnpj(String cnpj) {
+    public Empresa(String email, String senha, String nome, String cnpj, String descricao, String cidade) {
+        // Chama construtor parametrizado da superclasse, passando a role
+        super(email, senha, nome, "ROLE_EMPRESA");
         this.cnpj = cnpj;
-    }
-
-    public String getNome() {
-        return nome;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
-    public String getDescricao() {
-        return descricao;
-    }
-
-    public void setDescricao(String descricao) {
         this.descricao = descricao;
-    }
-
-    public String getCidade() {
-        return cidade;
-    }
-
-    public void setCidade(String cidade) {
         this.cidade = cidade;
     }
 
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_EMPRESA"));
+    // Getters e Setters específicos de Empresa
+    public String getCnpj() { 
+        return cnpj; 
+    }
+    public void setCnpj(String cnpj) { 
+        this.cnpj = cnpj; 
+    }
+    public String getDescricao() { 
+        return descricao; 
+    }
+    public void setDescricao(String descricao) { 
+        this.descricao = descricao; 
+    }
+    public String getCidade() { 
+        return cidade; 
+    }
+    public void setCidade(String cidade) { 
+        this.cidade = cidade; 
     }
 
-    @Override
-    public String getPassword() {
-        return senha;
-    }
-
-    @Override
-    public String getUsername() {
-        return email;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
+    // Os métodos de UserDetails (getAuthorities, getPassword, getUsername, etc.)
+    // são agora herdados diretamente de Usuario. Não precisam ser sobrescritos aqui,
+    // a menos que haja um comportamento muito específico para Empresa.
+    // O getAuthorities em Usuario já retornará "ROLE_EMPRESA" porque o construtor o define.
 }

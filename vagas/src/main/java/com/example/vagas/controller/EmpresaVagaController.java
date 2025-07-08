@@ -100,7 +100,7 @@ public class EmpresaVagaController {
             return "redirect:/empresa/vagas?error=acesso";
         }
         
-        candidatura.setStatus(StatusCandidatura.REJEITADO);
+        candidatura.setStatus(StatusCandidatura.NAO_SELECIONADO);
         candidaturaRepo.save(candidatura);
         
         // Envia e-mail de notificação
