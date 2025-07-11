@@ -32,38 +32,31 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
-                // Permite acesso a páginas públicas sem autenticação
                 // R4: Listagem de todas as vagas (em aberto) em uma única página (não requer login). 
-                // Também permite acesso a recursos estáticos (CSS, JS) e páginas de login.
                 .requestMatchers("/", "/login", "/vagas/listagem", "/css/**", "/js/**").permitAll()
 
-                // R1: CRUD de profissionais (requer login de administrador) [cite: 7]
-                // R2: CRUD de empresas (requer login de administrador) [cite: 8]
-                // Assumindo que URLs de admin começam com /admin/
+                // R1: CRUD de profissionais (requer login de administrador)
+                // R2: CRUD de empresas (requer login de administrador)
                 .requestMatchers("/admin/**").hasRole("ADMIN")
 
                 // R3: Cadastro de vagas de estágio/trabalho (requer login da empresa) 
                 // R6: Listagem de todas as vagas de uma empresa (requer login da empresa) 
                 // R8: Análise de candidaturas (requer login da empresa) 
-                // Assumindo que URLs para empresa começam com /empresa/ ou específicas de vaga/candidatura para empresa
                 .requestMatchers("/empresa/**", "/vagas/cadastro", "/vagas/minhas", "/candidaturas/analise/**").hasRole("EMPRESA")
 
                 // R5: Candidatura a vaga de estágio/trabalho (requer login do profissional) 
                 // R7: Listagem de todas as candidaturas de um profissional (requer login do profissional) 
-                // Assumindo que URLs para profissional começam com /profissional/ ou específicas de candidatura para profissional
-                // Sua regra original usava "PROFISSIONAIS", ajustei para "PROFISSIONAL" para consistência com as roles definidas.
                 .requestMatchers("/profissional/**", "/candidaturas/nova", "/candidaturas/minhas").hasRole("PROFISSIONAL")
                 
-                // Qualquer outra requisição requer autenticação
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
                 .loginPage("/login")
-                .successHandler(successHandler) // Redirecionamento customizado após login bem-sucedido
+                .successHandler(successHandler)
                 .permitAll()
             )
             .logout(logout -> logout
-                .logoutSuccessUrl("/?logout") // URL para onde redirecionar após logout
+                .logoutSuccessUrl("/?logout")
                 .permitAll()
             );
 

@@ -17,7 +17,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
 
         if (authentication.getAuthorities().stream()
                 .anyMatch(role -> role.getAuthority().equals("ROLE_ADMIN"))) {
-            response.sendRedirect("/vagas/listagem");
+            response.sendRedirect("/admin/index");
         } else if (authentication.getAuthorities().stream()
                 .anyMatch(role -> role.getAuthority().equals("ROLE_EMPRESA"))) {
             response.sendRedirect("/vagas/index");
